@@ -1,18 +1,74 @@
 
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LogOut, LogIn, User } from "lucide-react";
+import { LogOut, LogIn, User, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth, signOut } from "@/hooks/useAuth";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const Header: React.FC = () => {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const handleSignOut = async () => {
     await signOut();
     navigate("/auth");
   };
+
+  const renderNavItems = () => (
+    <>
+      <Link to="/">
+        <Button variant="ghost" className="text-bokumono-text font-medium text-lg">
+          ペット
+        </Button>
+      </Link>
+      <Link to="/calendar">
+        <Button variant="ghost" className="text-bokumono-text font-medium text-lg">
+          カレンダー
+        </Button>
+      </Link>
+      <Link to="/master">
+        <Button variant="ghost" className="text-bokumono-text font-medium text-lg flex items-center">
+          <User className="h-5 w-5 mr-1" />
+          マイページ
+        </Button>
+      </Link>
+      <Button
+        variant="ghost"
+        className="text-bokumono-text font-medium text-lg flex items-center"
+        onClick={handleSignOut}
+      >
+        <LogOut className="h-5 w-5 mr-1" />
+        ログアウト
+      </Button>
+    </>
+  );
+
+  const renderMobileMenu = () => (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="md:hidden">
+          <Menu className="h-6 w-6" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent>
+        <SheetHeader>
+          <SheetTitle>メニュー</SheetTitle>
+        </SheetHeader>
+        <nav className="flex flex-col space-y-4 mt-6">
+          {renderNavItems()}
+        </nav>
+      </SheetContent>
+    </Sheet>
+  );
 
   return (
     <header className="bg-bokumono-card shadow-md py-4 px-6 flex justify-between items-center">
@@ -21,6 +77,7 @@ const Header: React.FC = () => {
           bokumono Z
         </Link>
       </div>
+
       <div className="flex items-center space-x-6">
         {/* 未ログイン */}
         {!session && !loading && (
@@ -40,32 +97,15 @@ const Header: React.FC = () => {
         )}
         {/* ログイン時 */}
         {session && !loading && (
-          <nav className="flex items-center space-x-8">
-            <Link to="/">
-              <Button variant="ghost" className="text-bokumono-text font-medium text-lg">
-                ペット
-              </Button>
-            </Link>
-            <Link to="/calendar">
-              <Button variant="ghost" className="text-bokumono-text font-medium text-lg">
-                カレンダー
-              </Button>
-            </Link>
-            <Link to="/master">
-              <Button variant="ghost" className="text-bokumono-text font-medium text-lg flex items-center">
-                <User className="h-5 w-5 mr-1" />
-                マイページ
-              </Button>
-            </Link>
-            <Button
-              variant="ghost"
-              className="text-bokumono-text font-medium text-lg flex items-center"
-              onClick={handleSignOut}
-            >
-              <LogOut className="h-5 w-5 mr-1" />
-              ログアウト
-            </Button>
-          </nav>
+          <>
+            {isMobile ? (
+              renderMobileMenu()
+            ) : (
+              <nav className="hidden md:flex items-center space-x-8">
+                {renderNavItems()}
+              </nav>
+            )}
+          </>
         )}
       </div>
     </header>
