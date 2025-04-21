@@ -27,19 +27,19 @@ const Header: React.FC = () => {
     <>
       <Link to="/">
         <Button variant="ghost" className="text-bokumono-text font-medium text-lg flex items-center">
-          <Dog className="h-5 w-5 mr-1" />
+          <Dog className="h-5 w-5 mr-0.5" />
           ペット
         </Button>
       </Link>
       <Link to="/calendar">
         <Button variant="ghost" className="text-bokumono-text font-medium text-lg flex items-center">
-          <Calendar className="h-5 w-5 mr-1" />
+          <Calendar className="h-5 w-5 mr-0.5" />
           カレンダー
         </Button>
       </Link>
       <Link to="/master">
         <Button variant="ghost" className="text-bokumono-text font-medium text-lg flex items-center">
-          <User className="h-5 w-5 mr-1" />
+          <User className="h-5 w-5 mr-0.5" />
           マイページ
         </Button>
       </Link>
@@ -48,7 +48,7 @@ const Header: React.FC = () => {
         className="text-bokumono-text font-medium text-lg flex items-center"
         onClick={handleSignOut}
       >
-        <LogOut className="h-5 w-5 mr-1" />
+        <LogOut className="h-5 w-5 mr-0.5" />
         ログアウト
       </Button>
     </>
