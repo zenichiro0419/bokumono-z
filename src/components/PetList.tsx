@@ -57,7 +57,7 @@ const PetList: React.FC = () => {
           className="bg-bokumono-primary text-white hover:bg-bokumono-primary/90"
         >
           <Plus className="h-4 w-4 mr-2" />
-          add
+          新規登録
         </Button>
       </div>
 
