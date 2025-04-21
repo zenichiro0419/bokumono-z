@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useApp } from "@/context/AppContext";
-import { addHours } from "date-fns";
+import { addHours, format } from "date-fns";
 import { Schedule } from "@/types";
 import { FormFields } from "@/components/schedule/FormFields";
 
