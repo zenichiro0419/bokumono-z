@@ -15,7 +15,8 @@ const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     );
   }
   if (!session) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    // 未ログイン時はトップページへ
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;
