@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -41,9 +42,9 @@ const PetList: React.FC = () => {
 
   return (
     <div className="max-w-full">
-      <div className="flex items-center justify-between gap-4 mb-6">
-        <div className="relative flex-1 max-w-xl">
-          <Search className="pl-10 absolute left-3 top-1/2 transform -translate-y-1/2 text-bokumono-muted h-5 w-5" />
+      <div className="flex items-center gap-4 mb-6">
+        <div className="relative flex-grow max-w-xl">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-bokumono-muted h-5 w-5" />
           <Input
             type="text"
             placeholder="ペットを検索..."
@@ -54,7 +55,7 @@ const PetList: React.FC = () => {
         </div>
         <Button 
           onClick={handleAddPet}
-          className="bg-bokumono-primary text-white hover:bg-bokumono-primary/90"
+          className="bg-bokumono-primary text-white hover:bg-bokumono-primary/90 whitespace-nowrap"
         >
           <Plus className="h-4 w-4 mr-2" />
           新規登録
@@ -112,3 +113,4 @@ const PetList: React.FC = () => {
 };
 
 export default PetList;
+
