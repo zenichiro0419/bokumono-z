@@ -21,14 +21,19 @@ export const generateMockPets = (count: number): Pet[] => {
   for (let i = 0; i < count; i++) {
     const now = new Date();
     const status = Math.random() > 0.2 ? "active" : "archived";
+    const birthYear = now.getFullYear() - Math.floor(Math.random() * 15) - 1;
+    const birthMonth = Math.floor(Math.random() * 12);
+    const birthDay = Math.floor(Math.random() * 28) + 1;
+    const birthdate = new Date(birthYear, birthMonth, birthDay).toISOString().split('T')[0];
     
     pets.push({
       id: `pet-${i + 1}`,
       name: petNames[i % petNames.length],
-      age: Math.floor(Math.random() * 15) + 1,
+      birthdate: Math.random() > 0.3 ? birthdate : null,
       status: status as "active" | "archived",
       memo: `This is ${petNames[i % petNames.length]}'s memo. Add more details here.`,
       photoUrl: `/placeholder.svg`,
+      perceived_master_age: Math.floor(Math.random() * 40) + 20, // Random age between 20-60
       createdAt: randomDate(new Date(now.getFullYear() - 1, 0, 1), now),
       updatedAt: randomDate(new Date(now.getFullYear() - 1, 0, 1), now),
     });
