@@ -94,6 +94,10 @@ const EditMasterProfilePage: React.FC = () => {
         });
         
         if (ok) {
+          toast({
+            title: "成功",
+            description: "プロフィールを保存しました",
+          });
           navigate("/master");
         }
       } catch (err) {
