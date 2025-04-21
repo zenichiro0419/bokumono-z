@@ -43,7 +43,7 @@ const Header: React.FC = () => {
           <nav className="flex items-center space-x-8">
             <Link to="/">
               <Button variant="ghost" className="text-bokumono-text font-medium text-lg">
-                フレンド
+                ペット
               </Button>
             </Link>
             <Link to="/calendar">
