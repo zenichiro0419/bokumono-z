@@ -9,7 +9,10 @@ const ScheduleFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { getScheduleById, isLoading } = useApp();
   const location = useLocation();
-  const isEditing = id !== "new";
+  
+  // Check if we're on the /schedule/new path or editing an existing schedule
+  const isNew = !id || location.pathname === "/schedule/new";
+  const isEditing = !isNew;
   
   // Parse query parameters for default pet ID when creating a new schedule
   const queryParams = new URLSearchParams(location.search);
