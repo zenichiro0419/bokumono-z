@@ -2,10 +2,12 @@
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import PetCard from "@/components/PetCard";
-import { Search } from "lucide-react";
+import { Search, Plus } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { Pet } from "@/types";
+import { Link } from "react-router-dom";
 
 const PetList: React.FC = () => {
   const { activePets, archivedPets, isLoading } = useApp();
@@ -35,8 +37,8 @@ const PetList: React.FC = () => {
 
   return (
     <div>
-      <div className="mb-6">
-        <div className="relative">
+      <div className="flex items-center gap-4 mb-6">
+        <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-bokumono-muted h-5 w-5" />
           <Input
             type="text"
@@ -46,6 +48,12 @@ const PetList: React.FC = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+        <Link to="/pet/new">
+          <Button variant="outline" className="border-bokumono-primary text-bokumono-primary">
+            <Plus className="h-5 w-5" />
+            add
+          </Button>
+        </Link>
       </div>
 
       <Tabs defaultValue="active" className="w-full">
