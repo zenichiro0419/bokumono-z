@@ -17,9 +17,9 @@ const Header: React.FC = () => {
       </div>
       <div className="flex items-center space-x-2">
         {isMobile ? (
-          <nav className="flex space-x-1">
-            <Link to="/">
-              <Button variant="ghost" size="icon" className="text-bokumono-text">
+          <nav className="flex space-x-1 items-center">
+            <Link to="/master">
+              <Button variant="ghost" size="icon" className="text-bokumono-text" aria-label="マイページ">
                 <User className="h-5 w-5" />
               </Button>
             </Link>
@@ -35,7 +35,7 @@ const Header: React.FC = () => {
             </Link>
           </nav>
         ) : (
-          <nav className="flex space-x-4">
+          <nav className="flex space-x-4 items-center">
             <Link to="/">
               <Button variant="ghost" className="text-bokumono-text">
                 フレンド
@@ -49,6 +49,12 @@ const Header: React.FC = () => {
             <Link to="/pet/new">
               <Button variant="ghost" className="text-bokumono-text">
                 新規追加
+              </Button>
+            </Link>
+            <Link to="/master">
+              <Button variant="ghost" className="text-bokumono-text" aria-label="マイページ">
+                <User className="h-5 w-5 mr-1" />
+                マイページ
               </Button>
             </Link>
           </nav>

@@ -1,44 +1,81 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { User, Edit } from "lucide-react";
+import { useMasterProfile } from "@/hooks/useMasterProfile";
 
-// 仮データ
-const initialProfile = {
-  name: "マスター太郎",
-  bio: "このアプリの管理人です。ペット達の管理はお任せください。",
-  avatarUrl: "/placeholder.svg",
-};
+// サンプルアバター画像
+const PLACEHOLDER_AVATAR = "/placeholder.svg";
 
 const EditMasterProfilePage: React.FC = () => {
-  const [profile, setProfile] = useState(initialProfile);
-  const [avatarPreview, setAvatarPreview] = useState<string>(profile.avatarUrl);
+  const { profile, loading, error, saveProfile, setProfile } = useMasterProfile();
+  const [avatarPreview, setAvatarPreview] = useState<string>(profile?.avatar_url || PLACEHOLDER_AVATAR);
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
 
+  // フォームの入力用内部状態（useEffectでprofile反映）
+  useEffect(() => {
+    if (profile) {
+      setAvatarPreview(profile.avatar_url || PLACEHOLDER_AVATAR);
+    }
+  }, [profile]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center pt-8">
+        <div className="text-gray-400">ロード中...</div>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="flex flex-col items-center pt-8">
+        <div className="text-red-500">{error}</div>
+      </div>
+    );
+  }
+
+  // 入力changeハンドラ
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setProfile({
-      ...profile,
+      ...profile!,
       [e.target.name]: e.target.value,
     });
   };
 
+  // 画像アップロード（現状local previewのみ。バケット実装時supabase storageで差し替え可）
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const objectUrl = URL.createObjectURL(file);
       setAvatarPreview(objectUrl);
-      setProfile({ ...profile, avatarUrl: objectUrl });
+      setProfile && setProfile({
+        ...profile!,
+        avatar_url: objectUrl,
+      });
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 保存
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // 本来はここで保存ロジック
-    navigate("/master");
+    setSaving(true);
+    if (profile) {
+      const ok = await saveProfile({
+        id: profile.id,
+        name: profile.name || "No name",
+        bio: profile.bio || "",
+        avatar_url: profile.avatar_url || PLACEHOLDER_AVATAR,
+      });
+      if (ok) {
+        navigate("/master");
+      }
+    }
+    setSaving(false);
   };
 
   return (
@@ -77,16 +114,17 @@ const EditMasterProfilePage: React.FC = () => {
             <label className="block mb-1 text-muted-foreground">名前</label>
             <Input
               name="name"
-              value={profile.name}
+              value={profile?.name || ""}
               onChange={handleChange}
               placeholder="マスターの名前"
+              required
             />
           </div>
           <div>
             <label className="block mb-1 text-muted-foreground">自己紹介 / メモ</label>
             <Textarea
               name="bio"
-              value={profile.bio}
+              value={profile?.bio || ""}
               onChange={handleChange}
               placeholder="自己紹介やメモ"
             />
@@ -96,8 +134,8 @@ const EditMasterProfilePage: React.FC = () => {
           <Button type="button" variant="outline" onClick={() => navigate("/master")}>
             キャンセル
           </Button>
-          <Button type="submit" className="bg-bokumono-primary">
-            保存
+          <Button type="submit" className="bg-bokumono-primary" disabled={saving}>
+            {saving ? "保存中..." : "保存"}
           </Button>
         </CardFooter>
         </form>
