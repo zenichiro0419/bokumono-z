@@ -7,6 +7,7 @@ interface MasterProfile {
   name: string;
   bio?: string;
   avatar_url?: string;
+  birthdate?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -49,9 +50,10 @@ export function useMasterProfile() {
   }, []);
 
   // プロフィール保存/更新
-  const saveProfile = async (updates: Omit<MasterProfile, "created_at" | "updated_at">) => {
+  const saveProfile = async (
+    updates: Omit<MasterProfile, "created_at" | "updated_at">
+  ) => {
     setError(null);
-    // 既存プロフィールあれば update、なければ insert
     const toSave = {
       ...updates,
       updated_at: new Date().toISOString(),
@@ -68,12 +70,9 @@ export function useMasterProfile() {
     return true;
   };
 
-  // 画像アップロードはストレージバケット実装時に拡張可
-
   useEffect(() => {
     fetchProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchProfile]);
 
   return { profile, loading, error, fetchProfile, saveProfile, setProfile };
 }
