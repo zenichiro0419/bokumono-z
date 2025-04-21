@@ -5,34 +5,19 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/componen
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
 import { useMasterProfile } from "@/hooks/useMasterProfile";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { ErrorMessage } from "@/components/ErrorMessage";
+import { AvatarUpload } from "@/components/profile/AvatarUpload";
 import Layout from "@/components/Layout";
 
-// サンプルアバター画像
 const PLACEHOLDER_AVATAR = "/placeholder.svg";
 
 const MasterProfilePage: React.FC = () => {
   const { profile, loading, error } = useMasterProfile();
 
-  if (loading) {
-    return (
-      <Layout>
-        <div className="flex flex-col items-center pt-8">
-          <div className="text-gray-400">ロード中...</div>
-        </div>
-      </Layout>
-    );
-  }
-  if (error) {
-    return (
-      <Layout>
-        <div className="flex flex-col items-center pt-8">
-          <div className="text-red-500">{error}</div>
-        </div>
-      </Layout>
-    );
-  }
+  if (loading) return <Layout><LoadingSpinner /></Layout>;
+  if (error) return <Layout><ErrorMessage message={error} /></Layout>;
 
-  // フォーマット: YYYY/MM/DD
   const formattedBirthdate = profile?.birthdate
     ? new Date(profile.birthdate).toISOString().slice(0, 10).replace(/-/g, "/")
     : "未設定";
@@ -42,13 +27,11 @@ const MasterProfilePage: React.FC = () => {
       <div className="flex flex-col items-center pt-8">
         <Card className="w-full max-w-md glass-morphism">
           <CardHeader className="flex flex-col items-center">
-            <div className="w-24 h-24 rounded-full overflow-hidden mb-3 bg-gray-700">
-              <img
-                src={profile?.avatar_url || PLACEHOLDER_AVATAR}
-                alt="Master avatar"
-                className="object-cover w-full h-full"
-              />
-            </div>
+            <AvatarUpload
+              avatarUrl={profile?.avatar_url || PLACEHOLDER_AVATAR}
+              onAvatarChange={() => {}}
+              isEditable={false}
+            />
             <CardTitle className="flex items-center space-x-2">
               <User />
               <span>{profile?.name || "No name"}</span>

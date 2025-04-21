@@ -1,14 +1,13 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { User, Edit } from "lucide-react";
 import { useMasterProfile } from "@/hooks/useMasterProfile";
 import { useToast } from "@/hooks/use-toast";
+import { ProfileForm } from "@/components/profile/ProfileForm";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { ErrorMessage } from "@/components/ErrorMessage";
+import Layout from "@/components/Layout";
 
-// サンプルアバター画像
 const PLACEHOLDER_AVATAR = "/placeholder.svg";
 
 const EditMasterProfilePage: React.FC = () => {
@@ -18,7 +17,6 @@ const EditMasterProfilePage: React.FC = () => {
   const [birthdate, setBirthdate] = useState<string>("");
   const [name, setName] = useState<string>("");
   const { toast } = useToast();
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,13 +27,8 @@ const EditMasterProfilePage: React.FC = () => {
     }
   }, [profile]);
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center pt-8">
-        <div className="text-gray-400">ロード中...</div>
-      </div>
-    );
-  }
+  if (loading) return <Layout><LoadingSpinner /></Layout>;
+  if (error) return <Layout><ErrorMessage message={error} /></Layout>;
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -48,7 +41,6 @@ const EditMasterProfilePage: React.FC = () => {
     }
   };
 
-  // 誕生日変更（日付input対応）
   const handleBirthdateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setBirthdate(value);
@@ -60,7 +52,6 @@ const EditMasterProfilePage: React.FC = () => {
     }
   };
 
-  // 画像アップロード（local previewのみ）
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && profile) {
@@ -78,7 +69,6 @@ const EditMasterProfilePage: React.FC = () => {
     setSaving(true);
     
     try {
-      // プロフィールがない場合でもデフォルト値で保存できるようにする
       const profileToSave = profile || { id: "", name: "", avatar_url: PLACEHOLDER_AVATAR, birthdate: null };
       
       const ok = await saveProfile({
@@ -96,7 +86,6 @@ const EditMasterProfilePage: React.FC = () => {
         navigate("/master");
       }
     } catch (err) {
-      console.error("Submit error:", err);
       toast({
         title: "エラー",
         description: "保存中にエラーが発生しました",
@@ -108,72 +97,21 @@ const EditMasterProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center pt-8">
-      <Card className="w-full max-w-md glass-morphism">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Edit /> プロフィール編集
-          </CardTitle>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-6">
-            <div className="flex flex-col items-center">
-              <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-700 mb-3">
-                <img
-                  src={avatarPreview}
-                  alt="avatar"
-                  className="object-cover w-full h-full"
-                />
-                <label
-                  htmlFor="avatar-upload"
-                  className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 cursor-pointer text-xs font-medium text-white transition-opacity"
-                >
-                  画像変更
-                  <input
-                    id="avatar-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleAvatarChange}
-                  />
-                </label>
-              </div>
-            </div>
-            <div>
-              <label className="block mb-1 text-muted-foreground">名前</label>
-              <Input
-                name="name"
-                value={name}
-                onChange={handleNameChange}
-                placeholder="マスターの名前"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="birthdate" className="block mb-1 text-muted-foreground">誕生日</label>
-              <Input
-                id="birthdate"
-                name="birthdate"
-                type="date"
-                value={birthdate}
-                onChange={handleBirthdateChange}
-                max={new Date().toISOString().slice(0, 10)}
-                min="1900-01-01"
-                placeholder="誕生日を選択"
-              />
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={() => navigate("/master")}>
-              キャンセル
-            </Button>
-            <Button type="submit" className="bg-bokumono-primary" disabled={saving}>
-              {saving ? "保存中..." : "保存"}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
-    </div>
+    <Layout>
+      <div className="flex flex-col items-center pt-8">
+        <ProfileForm
+          name={name}
+          birthdate={birthdate}
+          avatarUrl={avatarPreview}
+          onNameChange={handleNameChange}
+          onBirthdateChange={handleBirthdateChange}
+          onAvatarChange={handleAvatarChange}
+          onSubmit={handleSubmit}
+          onCancel={() => navigate("/master")}
+          isSaving={saving}
+        />
+      </div>
+    </Layout>
   );
 };
 
