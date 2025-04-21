@@ -2,10 +2,12 @@
 export interface Pet {
   id: string;
   name: string;
-  age: number;
+  age?: number;
+  birthdate?: string | null;
   status: "active" | "archived";
   memo: string;
   photoUrl: string;
+  perceived_master_age: number;
   createdAt: string;
   updatedAt: string;
 }

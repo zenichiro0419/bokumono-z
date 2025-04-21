@@ -12,6 +12,7 @@ import {
   deleteMockSchedule
 } from "@/lib/mock-data";
 import { useToast } from "@/hooks/use-toast";
+import { format, parseISO, differenceInYears } from "date-fns";
 
 interface AppContextType {
   pets: Pet[];
@@ -22,13 +23,14 @@ interface AppContextType {
   getPetById: (id: string) => Pet | undefined;
   getScheduleById: (id: string) => Schedule | undefined;
   getSchedulesByPetId: (petId: string) => Schedule[];
-  addPet: (pet: Omit<Pet, "id" | "createdAt" | "updatedAt">) => Pet;
-  updatePet: (id: string, updates: Partial<Omit<Pet, "id" | "createdAt" | "updatedAt">>) => Pet | null;
+  addPet: (pet: Omit<Pet, "id" | "createdAt" | "updatedAt" | "age">) => Pet;
+  updatePet: (id: string, updates: Partial<Omit<Pet, "id" | "createdAt" | "updatedAt" | "age">>) => Pet | null;
   deletePet: (id: string) => boolean;
   addSchedule: (schedule: Omit<Schedule, "id" | "createdAt" | "updatedAt">) => Schedule | null;
   updateSchedule: (id: string, updates: Partial<Omit<Schedule, "id" | "createdAt" | "updatedAt">>) => Schedule | null;
   deleteSchedule: (id: string) => boolean;
   checkScheduleConflict: (petId: string, startDate: string, endDate: string, excludeId?: string) => boolean;
+  calculatePetAge: (birthdate: string | null | undefined) => number | undefined;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -55,6 +57,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     loadData();
   }, []);
+
+  // Calculate pet age from birthdate
+  const calculatePetAge = (birthdate: string | null | undefined): number | undefined => {
+    if (!birthdate) return undefined;
+    try {
+      const birthdateDate = parseISO(birthdate);
+      return differenceInYears(new Date(), birthdateDate);
+    } catch (e) {
+      console.error("Error calculating age:", e);
+      return undefined;
+    }
+  };
 
   // Utility functions
   const getPetById = (id: string) => pets.find(pet => pet.id === id);
@@ -88,7 +102,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   // CRUD operations for pets
-  const addPet = (pet: Omit<Pet, "id" | "createdAt" | "updatedAt">) => {
+  const addPet = (pet: Omit<Pet, "id" | "createdAt" | "updatedAt" | "age">) => {
     const newPet = addMockPet(pet);
     setPets([...pets, newPet]);
     toast({
@@ -98,7 +112,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return newPet;
   };
 
-  const updatePet = (id: string, updates: Partial<Omit<Pet, "id" | "createdAt" | "updatedAt">>) => {
+  const updatePet = (id: string, updates: Partial<Omit<Pet, "id" | "createdAt" | "updatedAt" | "age">>) => {
     const updatedPet = updateMockPet(id, updates);
     if (updatedPet) {
       setPets(pets.map(pet => pet.id === id ? updatedPet : pet));
@@ -215,6 +229,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     updateSchedule,
     deleteSchedule,
     checkScheduleConflict,
+    calculatePetAge,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

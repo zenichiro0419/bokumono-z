@@ -20,6 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format, parseISO } from "date-fns";
+import { ja } from "date-fns/locale";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -32,10 +38,11 @@ interface PetFormProps {
 
 const formSchema = z.object({
   name: z.string().min(1, "ペットの名前は必須です"),
-  age: z.coerce.number().min(0, "年齢は0以上である必要があります"),
+  birthdate: z.date().nullable().optional(),
   status: z.enum(["active", "archived"]),
   memo: z.string().optional(),
   photoUrl: z.string().optional(),
+  perceived_master_age: z.coerce.number().min(1, "設定年齢は1以上である必要があります"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -51,25 +58,33 @@ const PetForm: React.FC<PetFormProps> = ({ pet, isEditing = false }) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: pet?.name || "",
-      age: pet?.age || 0,
+      birthdate: pet?.birthdate ? parseISO(pet.birthdate) : null,
       status: pet?.status || "active",
       memo: pet?.memo || "",
       photoUrl: pet?.photoUrl || "/placeholder.svg",
+      perceived_master_age: pet?.perceived_master_age || 25,
     },
   });
 
   const onSubmit = (values: FormValues) => {
+    // Convert Date to ISO string for storage
+    const birthdate = values.birthdate ? format(values.birthdate, 'yyyy-MM-dd') : null;
+
     if (isEditing && pet) {
-      updatePet(pet.id, values);
+      updatePet(pet.id, {
+        ...values,
+        birthdate,
+      });
       navigate(`/pet/${pet.id}`);
     } else {
       // Make sure all required fields are explicitly set before passing to addPet
-      const newPetData: Omit<Pet, "id" | "createdAt" | "updatedAt"> = {
+      const newPetData: Omit<Pet, "id" | "createdAt" | "updatedAt" | "age"> = {
         name: values.name,
-        age: values.age,
+        birthdate,
         status: values.status,
         memo: values.memo || "",
         photoUrl: values.photoUrl || "/placeholder.svg",
+        perceived_master_age: values.perceived_master_age,
       };
       
       const newPet = addPet(newPetData);
@@ -140,15 +155,56 @@ const PetForm: React.FC<PetFormProps> = ({ pet, isEditing = false }) => {
 
           <FormField
             control={form.control}
-            name="age"
+            name="birthdate"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>誕生日</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, 'yyyy/MM/dd', { locale: ja })
+                        ) : (
+                          <span>誕生日を選択</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value || undefined}
+                      onSelect={field.onChange}
+                      initialFocus
+                      locale={ja}
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="perceived_master_age"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>年齢</FormLabel>
+                <FormLabel>設定年齢</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
-                    min="0"
-                    placeholder="年齢"
+                    min="1"
+                    placeholder="マスターの年齢（ペットが認識している）"
                     {...field}
                   />
                 </FormControl>

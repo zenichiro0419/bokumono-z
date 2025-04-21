@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      pets: {
+        Row: {
+          birthdate: string | null
+          created_at: string
+          id: string
+          memo: string | null
+          name: string
+          perceived_master_age: number
+          photo_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          birthdate?: string | null
+          created_at?: string
+          id?: string
+          memo?: string | null
+          name: string
+          perceived_master_age?: number
+          photo_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          birthdate?: string | null
+          created_at?: string
+          id?: string
+          memo?: string | null
+          name?: string
+          perceived_master_age?: number
+          photo_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -41,7 +80,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_age: {
+        Args: { birthdate: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

@@ -27,9 +27,10 @@ interface PetDetailProps {
 }
 
 const PetDetail: React.FC<PetDetailProps> = ({ pet, schedules }) => {
-  const { deletePet } = useApp();
+  const { deletePet, calculatePetAge } = useApp();
   const navigate = useNavigate();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const age = calculatePetAge(pet.birthdate);
 
   const handleDelete = () => {
     deletePet(pet.id);
@@ -129,9 +130,23 @@ const PetDetail: React.FC<PetDetailProps> = ({ pet, schedules }) => {
                 </Badge>
               </div>
               <div className="grid grid-cols-1 gap-3 mb-4">
+                {age !== undefined && (
+                  <div>
+                    <span className="text-bokumono-muted text-sm">年齢：</span>
+                    <span className="text-bokumono-text">{age}歳</span>
+                    {pet.birthdate && (
+                      <span className="text-bokumono-muted text-sm ml-2">
+                        （{format(new Date(pet.birthdate), 'yyyy年MM月dd日', { locale: ja })}生まれ）
+                      </span>
+                    )}
+                  </div>
+                )}
                 <div>
-                  <span className="text-bokumono-muted text-sm">年齢：</span>
-                  <span className="text-bokumono-text">{pet.age}歳</span>
+                  <span className="text-bokumono-muted text-sm">設定年齢：</span>
+                  <span className="text-bokumono-text">{pet.perceived_master_age}歳</span>
+                  <span className="text-bokumono-muted text-sm ml-2">
+                    （ペットが認識しているマスターの年齢）
+                  </span>
                 </div>
                 <div>
                   <span className="text-bokumono-muted text-sm">メモ：</span>

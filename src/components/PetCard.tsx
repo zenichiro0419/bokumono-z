@@ -15,8 +15,9 @@ interface PetCardProps {
 }
 
 const PetCard: React.FC<PetCardProps> = ({ pet }) => {
-  const { updatePet, getSchedulesByPetId } = useApp();
+  const { updatePet, getSchedulesByPetId, calculatePetAge } = useApp();
   const schedules = getSchedulesByPetId(pet.id);
+  const age = calculatePetAge(pet.birthdate);
 
   const handleStatusToggle = () => {
     updatePet(pet.id, {
@@ -58,7 +59,7 @@ const PetCard: React.FC<PetCardProps> = ({ pet }) => {
           <h3 className="text-xl font-semibold text-bokumono-text">
             {pet.name}
           </h3>
-          <span className="text-sm text-bokumono-muted">{pet.age}歳</span>
+          <span className="text-sm text-bokumono-muted">{age !== undefined ? `${age}歳` : '年齢不明'}</span>
         </div>
         <p className="text-sm text-bokumono-muted line-clamp-2 mb-2">
           {pet.memo || "メモはありません"}
