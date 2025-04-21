@@ -13,10 +13,10 @@ const PLACEHOLDER_AVATAR = "/placeholder.svg";
 
 const EditMasterProfilePage: React.FC = () => {
   const { profile, loading, error, saveProfile, setProfile } = useMasterProfile();
-  const [avatarPreview, setAvatarPreview] = useState<string>(profile?.avatar_url || PLACEHOLDER_AVATAR);
+  const [avatarPreview, setAvatarPreview] = useState<string>(PLACEHOLDER_AVATAR);
   const [saving, setSaving] = useState(false);
-  const [birthdate, setBirthdate] = useState<string>(profile?.birthdate || "");
-  const [name, setName] = useState<string>(profile?.name || "");
+  const [birthdate, setBirthdate] = useState<string>("");
+  const [name, setName] = useState<string>("");
   const { toast } = useToast();
 
   const navigate = useNavigate();
@@ -33,13 +33,6 @@ const EditMasterProfilePage: React.FC = () => {
     return (
       <div className="flex flex-col items-center pt-8">
         <div className="text-gray-400">ロード中...</div>
-      </div>
-    );
-  }
-  if (error) {
-    return (
-      <div className="flex flex-col items-center pt-8">
-        <div className="text-red-500">{error}</div>
       </div>
     );
   }
@@ -84,38 +77,32 @@ const EditMasterProfilePage: React.FC = () => {
     e.preventDefault();
     setSaving(true);
     
-    if (profile) {
-      try {
-        const ok = await saveProfile({
-          id: profile.id,
-          name: name || "No name",
-          avatar_url: profile.avatar_url || PLACEHOLDER_AVATAR,
-          birthdate: profile.birthdate || null,
-        });
-        
-        if (ok) {
-          toast({
-            title: "成功",
-            description: "プロフィールを保存しました",
-          });
-          navigate("/master");
-        }
-      } catch (err) {
-        console.error("Submit error:", err);
+    try {
+      // プロフィールがない場合でもデフォルト値で保存できるようにする
+      const profileToSave = profile || { id: "", name: "", avatar_url: PLACEHOLDER_AVATAR, birthdate: null };
+      
+      const ok = await saveProfile({
+        id: profileToSave.id,
+        name: name || "No name",
+        avatar_url: avatarPreview || PLACEHOLDER_AVATAR,
+        birthdate: birthdate || null,
+      });
+      
+      if (ok) {
         toast({
-          title: "エラー",
-          description: "保存中にエラーが発生しました",
-          variant: "destructive",
+          title: "成功",
+          description: "プロフィールを保存しました",
         });
-      } finally {
-        setSaving(false);
+        navigate("/master");
       }
-    } else {
+    } catch (err) {
+      console.error("Submit error:", err);
       toast({
         title: "エラー",
-        description: "プロフィールデータが見つかりません",
+        description: "保存中にエラーが発生しました",
         variant: "destructive",
       });
+    } finally {
       setSaving(false);
     }
   };

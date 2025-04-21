@@ -46,7 +46,16 @@ export function useMasterProfile() {
       console.error("Profile fetch error:", error);
       setProfile(null);
     } else {
-      setProfile(data ?? null);
+      // データがnullでも初期プロフィールを作成
+      if (!data) {
+        // ユーザーIDのみの初期プロフィールを設定
+        setProfile({
+          id: userId,
+          name: "No name",
+        });
+      } else {
+        setProfile(data);
+      }
     }
     setLoading(false);
   }, []);
@@ -87,12 +96,14 @@ export function useMasterProfile() {
       let result;
       if (existingProfile) {
         // 既存プロフィールを更新
+        console.log("Updating profile:", toSave);
         result = await supabase
           .from("profiles")
           .update(toSave)
           .eq("id", userId);
       } else {
         // 新規プロフィールを作成
+        console.log("Creating new profile:", toSave);
         result = await supabase
           .from("profiles")
           .insert({ ...toSave, created_at: new Date().toISOString() });
@@ -109,11 +120,7 @@ export function useMasterProfile() {
         return false;
       }
       
-      toast({
-        title: "成功",
-        description: "プロフィールを保存しました",
-      });
-      
+      // 成功後、再度プロフィールをフェッチ
       await fetchProfile();
       return true;
     } catch (err) {
