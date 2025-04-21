@@ -41,7 +41,11 @@ const App = () => {
                 />
                 <Route
                   path="/pet/new"
-                  element={<PetFormPage />}
+                  element={
+                    <AuthGuard>
+                      <PetFormPage />
+                    </AuthGuard>
+                  }
                 />
                 <Route
                   path="/pet/:id/edit"
