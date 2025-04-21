@@ -1,22 +1,14 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Pet } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useApp } from "@/context/AppContext";
+import { PetFormFields } from "@/components/pet/PetFormFields";
 
 interface PetFormProps {
   pet?: Pet;
@@ -53,6 +45,15 @@ const PetForm: React.FC<PetFormProps> = ({ pet, isEditing = false }) => {
     },
   });
 
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const objectUrl = URL.createObjectURL(file);
+      setPhotoPreview(objectUrl);
+      form.setValue("photoUrl", objectUrl);
+    }
+  };
+
   const onSubmit = (values: FormValues) => {
     if (isEditing && pet) {
       updatePet(pet.id, values);
@@ -72,15 +73,6 @@ const PetForm: React.FC<PetFormProps> = ({ pet, isEditing = false }) => {
     }
   };
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const objectUrl = URL.createObjectURL(file);
-      setPhotoPreview(objectUrl);
-      form.setValue("photoUrl", objectUrl);
-    }
-  };
-
   return (
     <div className="max-w-md mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-center">
@@ -89,121 +81,10 @@ const PetForm: React.FC<PetFormProps> = ({ pet, isEditing = false }) => {
       
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="mb-6">
-            <div className="flex justify-center mb-4">
-              <div className="relative w-32 h-32 rounded-full overflow-hidden bg-gray-800 border-2 border-bokumono-muted/30">
-                <img
-                  src={photoPreview || "/placeholder.svg"}
-                  alt="Pet"
-                  className="w-full h-full object-cover"
-                />
-                <label
-                  htmlFor="photo-upload"
-                  className="absolute inset-0 bg-bokumono-background/50 flex items-center justify-center cursor-pointer opacity-0 hover:opacity-100 transition-opacity"
-                >
-                  <span className="text-white text-sm font-medium">
-                    写真を変更
-                  </span>
-                  <input
-                    id="photo-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handlePhotoChange}
-                  />
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>名前</FormLabel>
-                <FormControl>
-                  <Input placeholder="ペットの名前" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="birthdate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>誕生日 (YYYY-MM-DD)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="text"
-                    placeholder="2020-01-01"
-                    pattern="\d{4}-\d{2}-\d{2}"
-                    {...field}
-                    value={field.value || ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="perceived_master_age"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>設定年齢</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min="1"
-                    placeholder="マスターの年齢（ペットが認識している）"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>ステータス</FormLabel>
-                <FormControl>
-                  <Tabs
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    className="w-full"
-                  >
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="active">アクティブ</TabsTrigger>
-                      <TabsTrigger value="archived">アーカイブ</TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="memo"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>メモ</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="ペットについてのメモ" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          <PetFormFields
+            form={form}
+            photoPreview={photoPreview}
+            onPhotoChange={handlePhotoChange}
           />
 
           <div className="flex space-x-4 pt-4">
