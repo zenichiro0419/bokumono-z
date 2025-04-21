@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useParams, useLocation, Navigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -34,9 +33,7 @@ const ScheduleFormPage: React.FC = () => {
 
   // Check if user is logged in
   if (!session) {
-    toast("予定を追加・編集するにはログインしてください", {
-      variant: "destructive"
-    });
+    toast.error("予定を追加・編集するにはログインしてください");
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 

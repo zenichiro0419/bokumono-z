@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useParams, Navigate, useLocation } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -30,9 +29,7 @@ const PetFormPage: React.FC = () => {
 
   // For new pets, check if user is logged in
   if (isNewPet && !session) {
-    toast("ペットを追加するにはログインしてください", {
-      variant: "destructive"
-    });
+    toast.error("ペットを追加するにはログインしてください");
     return <Navigate to="/auth" replace />;
   }
 
