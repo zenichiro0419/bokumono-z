@@ -7,11 +7,12 @@ import PetCard from "@/components/PetCard";
 import { Search, Plus } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { Pet } from "@/types";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const PetList: React.FC = () => {
   const { activePets, archivedPets, isLoading } = useApp();
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
   const filterPets = (pets: Pet[], query: string) => {
     if (!query.trim()) return pets;
@@ -25,6 +26,10 @@ const PetList: React.FC = () => {
 
   const filteredActivePets = filterPets(activePets, searchQuery);
   const filteredArchivedPets = filterPets(archivedPets, searchQuery);
+
+  const handleAddPet = () => {
+    navigate("/pet/new");
+  };
 
   if (isLoading) {
     return (
@@ -48,12 +53,14 @@ const PetList: React.FC = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Link to="/pet/new">
-          <Button variant="outline" className="border-bokumono-primary text-bokumono-primary">
-            <Plus className="h-5 w-5" />
-            add
-          </Button>
-        </Link>
+        <Button 
+          variant="outline" 
+          className="border-bokumono-primary text-bokumono-primary"
+          onClick={handleAddPet}
+        >
+          <Plus className="h-5 w-5" />
+          add
+        </Button>
       </div>
 
       <Tabs defaultValue="active" className="w-full">
