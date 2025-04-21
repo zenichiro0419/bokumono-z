@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, useLocation } from "react-router-dom";
 import Layout from "@/components/Layout";
 import PetForm from "@/components/PetForm";
 import { useApp } from "@/context/AppContext";
@@ -8,7 +8,11 @@ import { useApp } from "@/context/AppContext";
 const PetFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { getPetById, isLoading } = useApp();
-  const isEditing = id !== "new";
+  const location = useLocation();
+  
+  console.log("PetFormPage accessed with path:", location.pathname);
+  const isEditing = id && id !== "new";
+  const isNewPet = location.pathname === "/pet/new";
 
   if (isLoading) {
     return (

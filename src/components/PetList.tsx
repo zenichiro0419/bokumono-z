@@ -29,7 +29,8 @@ const PetList: React.FC = () => {
 
   const handleAddPet = () => {
     console.log("Navigating to /pet/new");
-    navigate("/pet/new");
+    // Use direct window.location to force a full navigation
+    window.location.href = "/pet/new";
   };
 
   if (isLoading) {

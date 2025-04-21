@@ -14,7 +14,10 @@ const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </div>
     );
   }
-  if (!session) {
+  
+  // For pet/new, allow access even if not logged in
+  if (!session && location.pathname !== "/pet/new") {
+    console.log("AuthGuard redirecting to home from:", location.pathname);
     // 未ログイン時はトップページへ
     return <Navigate to="/" state={{ from: location }} replace />;
   }
