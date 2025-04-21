@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User, Edit } from "lucide-react";
 import { useMasterProfile } from "@/hooks/useMasterProfile";
+import { useToast } from "@/hooks/use-toast";
 
 // サンプルアバター画像
 const PLACEHOLDER_AVATAR = "/placeholder.svg";
@@ -15,6 +16,7 @@ const EditMasterProfilePage: React.FC = () => {
   const [avatarPreview, setAvatarPreview] = useState<string>(profile?.avatar_url || PLACEHOLDER_AVATAR);
   const [saving, setSaving] = useState(false);
   const [birthdate, setBirthdate] = useState<string>(profile?.birthdate || "");
+  const { toast } = useToast();
 
   const navigate = useNavigate();
 
@@ -41,30 +43,34 @@ const EditMasterProfilePage: React.FC = () => {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setProfile({
-      ...profile!,
-      [e.target.name]: e.target.value,
-    });
+    if (profile) {
+      setProfile({
+        ...profile,
+        [e.target.name]: e.target.value,
+      });
+    }
   };
 
   // 誕生日変更（日付input対応）
   const handleBirthdateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setBirthdate(value);
-    setProfile({
-      ...profile!,
-      birthdate: value || null,
-    });
+    if (profile) {
+      setProfile({
+        ...profile,
+        birthdate: value || null,
+      });
+    }
   };
 
   // 画像アップロード（local previewのみ）
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (file && profile) {
       const objectUrl = URL.createObjectURL(file);
       setAvatarPreview(objectUrl);
       setProfile({
-        ...profile!,
+        ...profile,
         avatar_url: objectUrl,
       });
     }
@@ -73,18 +79,37 @@ const EditMasterProfilePage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    
     if (profile) {
-      const ok = await saveProfile({
-        id: profile.id,
-        name: profile.name || "No name",
-        avatar_url: profile.avatar_url || PLACEHOLDER_AVATAR,
-        birthdate: profile.birthdate || null,
-      });
-      if (ok) {
-        navigate("/master");
+      try {
+        const ok = await saveProfile({
+          id: profile.id,
+          name: profile.name || "No name",
+          avatar_url: profile.avatar_url || PLACEHOLDER_AVATAR,
+          birthdate: profile.birthdate || null,
+        });
+        
+        if (ok) {
+          navigate("/master");
+        }
+      } catch (err) {
+        console.error("Submit error:", err);
+        toast({
+          title: "エラー",
+          description: "保存中にエラーが発生しました",
+          variant: "destructive",
+        });
+      } finally {
+        setSaving(false);
       }
+    } else {
+      toast({
+        title: "エラー",
+        description: "プロフィールデータが見つかりません",
+        variant: "destructive",
+      });
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   return (
