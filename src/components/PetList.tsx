@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -28,9 +27,7 @@ const PetList: React.FC = () => {
   const filteredArchivedPets = filterPets(archivedPets, searchQuery);
 
   const handleAddPet = () => {
-    console.log("Navigating to /pet/new");
-    // Use direct window.location to force a full navigation
-    window.location.href = "/pet/new";
+    navigate("/pet/new");
   };
 
   if (isLoading) {
@@ -44,7 +41,7 @@ const PetList: React.FC = () => {
 
   return (
     <div className="max-w-full">
-      <div className="flex items-center justify-center gap-4 mb-6">
+      <div className="flex items-center justify-between gap-4 mb-6">
         <div className="relative flex-1 max-w-xl">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-bokumono-muted h-5 w-5" />
           <Input
@@ -56,11 +53,10 @@ const PetList: React.FC = () => {
           />
         </div>
         <Button 
-          variant="outline" 
-          className="border-bokumono-primary text-bokumono-primary hover:bg-bokumono-primary/10"
           onClick={handleAddPet}
+          className="bg-bokumono-primary text-white hover:bg-bokumono-primary/90"
         >
-          <Plus className="h-5 w-5" />
+          <Plus className="h-4 w-4 mr-2" />
           add
         </Button>
       </div>

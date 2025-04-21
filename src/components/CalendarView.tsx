@@ -99,7 +99,7 @@ const CalendarView: React.FC = () => {
             </SelectContent>
           </Select>
           <Link to="/schedule/new">
-            <Button className="bg-bokumono-primary">
+            <Button className="bg-bokumono-primary text-white hover:bg-bokumono-primary/90">
               <Plus className="h-4 w-4 mr-2" />
               予定を追加
             </Button>
