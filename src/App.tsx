@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,30 +15,33 @@ import ScheduleFormPage from "./pages/ScheduleFormPage";
 import MasterProfilePage from "./pages/MasterProfilePage";
 import EditMasterProfilePage from "./pages/EditMasterProfilePage";
 
+// Create a client
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
       <AppProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/pet/:id" element={<PetDetailPage />} />
-            <Route path="/pet/:id/edit" element={<PetFormPage />} />
-            <Route path="/calendar" element={<CalendarPage />} />
-            <Route path="/schedule/:id" element={<ScheduleDetailPage />} />
-            <Route path="/schedule/:id/edit" element={<ScheduleFormPage />} />
-            <Route path="/master" element={<MasterProfilePage />} />
-            <Route path="/master/edit" element={<EditMasterProfilePage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <TooltipProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/pet/:id" element={<PetDetailPage />} />
+              <Route path="/pet/:id/edit" element={<PetFormPage />} />
+              <Route path="/calendar" element={<CalendarPage />} />
+              <Route path="/schedule/:id" element={<ScheduleDetailPage />} />
+              <Route path="/schedule/:id/edit" element={<ScheduleFormPage />} />
+              <Route path="/master" element={<MasterProfilePage />} />
+              <Route path="/master/edit" element={<EditMasterProfilePage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+          <Toaster />
+          <Sonner />
+        </TooltipProvider>
       </AppProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    </QueryClientProvider>
+  );
+};
 
 export default App;
