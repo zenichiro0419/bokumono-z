@@ -34,8 +34,7 @@ const ScheduleFormPage: React.FC = () => {
 
   // Check if user is logged in
   if (!session) {
-    toast({
-      description: "予定を追加・編集するにはログインしてください",
+    toast("予定を追加・編集するにはログインしてください", {
       variant: "destructive"
     });
     return <Navigate to="/auth" state={{ from: location }} replace />;
