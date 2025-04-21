@@ -6,9 +6,11 @@ import PetList from "@/components/PetList";
 const PetsPage: React.FC = () => {
   return (
     <Layout>
-      <PetList />
+      <div className="container mx-auto py-8 px-4">
+        <PetList />
+      </div>
     </Layout>
   );
 };
 
-export default PetList;
+export default PetsPage;
