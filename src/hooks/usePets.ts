@@ -13,6 +13,7 @@ export const usePets = () => {
 
   const loadPets = useCallback(async () => {
     try {
+      setIsLoading(true);
       const { data: petsData, error: petsError } = await supabase
         .from('pets')
         .select('*')
@@ -24,7 +25,7 @@ export const usePets = () => {
         id: pet.id,
         name: pet.name,
         birthdate: pet.birthdate,
-        status: pet.status as "active" | "archived",
+        status: pet.status as "active" | "archived", // Type assertion to ensure status is of the correct type
         memo: pet.memo || "",
         photoUrl: pet.photo_url || "/placeholder.svg",
         perceived_master_age: pet.perceived_master_age,
@@ -40,6 +41,8 @@ export const usePets = () => {
         description: "ペットデータの読み込みに失敗しました",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   }, [toast]);
 
@@ -52,7 +55,7 @@ export const usePets = () => {
         .insert([{
           name: pet.name,
           birthdate: pet.birthdate,
-          status: pet.status,
+          status: pet.status, // pet.status is already of type "active" | "archived"
           memo: pet.memo,
           photo_url: pet.photoUrl,
           perceived_master_age: pet.perceived_master_age,
@@ -67,7 +70,7 @@ export const usePets = () => {
         id: data.id,
         name: data.name,
         birthdate: data.birthdate,
-        status: data.status,
+        status: data.status as "active" | "archived", // Type assertion to ensure status is of the correct type
         memo: data.memo || "",
         photoUrl: data.photo_url || "/placeholder.svg",
         perceived_master_age: data.perceived_master_age,
@@ -114,7 +117,7 @@ export const usePets = () => {
         id: data.id,
         name: data.name,
         birthdate: data.birthdate,
-        status: data.status,
+        status: data.status as "active" | "archived", // Type assertion to ensure status is of the correct type
         memo: data.memo || "",
         photoUrl: data.photo_url || "/placeholder.svg",
         perceived_master_age: data.perceived_master_age,
