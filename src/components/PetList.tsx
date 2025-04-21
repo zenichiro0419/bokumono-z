@@ -28,6 +28,7 @@ const PetList: React.FC = () => {
   const filteredArchivedPets = filterPets(archivedPets, searchQuery);
 
   const handleAddPet = () => {
+    console.log("Navigating to /pet/new");
     navigate("/pet/new");
   };
 
@@ -55,7 +56,7 @@ const PetList: React.FC = () => {
         </div>
         <Button 
           variant="outline" 
-          className="border-bokumono-primary text-bokumono-primary"
+          className="border-bokumono-primary text-bokumono-primary hover:bg-bokumono-primary/10"
           onClick={handleAddPet}
         >
           <Plus className="h-5 w-5" />

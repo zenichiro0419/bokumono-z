@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LogOut, LogIn, User, Menu } from "lucide-react";
+import { LogOut, LogIn, User, Menu, Dog, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth, signOut } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -26,12 +26,14 @@ const Header: React.FC = () => {
   const renderNavItems = () => (
     <>
       <Link to="/">
-        <Button variant="ghost" className="text-bokumono-text font-medium text-lg">
+        <Button variant="ghost" className="text-bokumono-text font-medium text-lg flex items-center">
+          <Dog className="h-5 w-5 mr-1" />
           ペット
         </Button>
       </Link>
       <Link to="/calendar">
-        <Button variant="ghost" className="text-bokumono-text font-medium text-lg">
+        <Button variant="ghost" className="text-bokumono-text font-medium text-lg flex items-center">
+          <Calendar className="h-5 w-5 mr-1" />
           カレンダー
         </Button>
       </Link>
