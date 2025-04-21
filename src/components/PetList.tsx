@@ -43,11 +43,11 @@ const PetList: React.FC = () => {
     <div className="max-w-full">
       <div className="flex items-center justify-between gap-4 mb-6">
         <div className="relative flex-1 max-w-xl">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-bokumono-muted h-5 w-5" />
+          <Search className="pl-10 absolute left-3 top-1/2 transform -translate-y-1/2 text-bokumono-muted h-5 w-5" />
           <Input
             type="text"
             placeholder="ペットを検索..."
-            className="bg-bokumono-card text-bokumono-text border-bokumono-muted/30 w-full"
+            className="pl-1 bg-bokumono-card text-bokumono-text border-bokumono-muted/30 w-full"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
