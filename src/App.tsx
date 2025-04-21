@@ -14,6 +14,9 @@ import ScheduleDetailPage from "./pages/ScheduleDetailPage";
 import ScheduleFormPage from "./pages/ScheduleFormPage";
 import MasterProfilePage from "./pages/MasterProfilePage";
 import EditMasterProfilePage from "./pages/EditMasterProfilePage";
+import AuthPage from "./pages/AuthPage";
+import { AuthProvider } from "@/hooks/useAuth";
+import AuthGuard from "@/components/AuthGuard";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -21,25 +24,77 @@ const queryClient = new QueryClient();
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <AppProvider>
-        <TooltipProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/pet/:id" element={<PetDetailPage />} />
-              <Route path="/pet/:id/edit" element={<PetFormPage />} />
-              <Route path="/calendar" element={<CalendarPage />} />
-              <Route path="/schedule/:id" element={<ScheduleDetailPage />} />
-              <Route path="/schedule/:id/edit" element={<ScheduleFormPage />} />
-              <Route path="/master" element={<MasterProfilePage />} />
-              <Route path="/master/edit" element={<EditMasterProfilePage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-          <Toaster />
-          <Sonner />
-        </TooltipProvider>
-      </AppProvider>
+      <AuthProvider>
+        <AppProvider>
+          <TooltipProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/" element={<Index />} />
+                <Route
+                  path="/pet/:id"
+                  element={
+                    <AuthGuard>
+                      <PetDetailPage />
+                    </AuthGuard>
+                  }
+                />
+                <Route
+                  path="/pet/:id/edit"
+                  element={
+                    <AuthGuard>
+                      <PetFormPage />
+                    </AuthGuard>
+                  }
+                />
+                <Route
+                  path="/calendar"
+                  element={
+                    <AuthGuard>
+                      <CalendarPage />
+                    </AuthGuard>
+                  }
+                />
+                <Route
+                  path="/schedule/:id"
+                  element={
+                    <AuthGuard>
+                      <ScheduleDetailPage />
+                    </AuthGuard>
+                  }
+                />
+                <Route
+                  path="/schedule/:id/edit"
+                  element={
+                    <AuthGuard>
+                      <ScheduleFormPage />
+                    </AuthGuard>
+                  }
+                />
+                <Route
+                  path="/master"
+                  element={
+                    <AuthGuard>
+                      <MasterProfilePage />
+                    </AuthGuard>
+                  }
+                />
+                <Route
+                  path="/master/edit"
+                  element={
+                    <AuthGuard>
+                      <EditMasterProfilePage />
+                    </AuthGuard>
+                  }
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+            <Toaster />
+            <Sonner />
+          </TooltipProvider>
+        </AppProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };

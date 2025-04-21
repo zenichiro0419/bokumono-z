@@ -1,12 +1,20 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
-import { CalendarDays, Plus, User } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { CalendarDays, Plus, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth, signOut } from "@/hooks/useAuth";
 
 const Header: React.FC = () => {
   const isMobile = useIsMobile();
+  const { session, loading } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
 
   return (
     <header className="bg-bokumono-card shadow-md py-4 px-6 flex justify-between items-center">
@@ -33,6 +41,18 @@ const Header: React.FC = () => {
                 <Plus className="h-5 w-5" />
               </Button>
             </Link>
+            {session && !loading && (
+              <Button variant="ghost" size="icon" className="text-bokumono-text" onClick={handleSignOut} aria-label="ログアウト">
+                <LogOut className="h-5 w-5" />
+              </Button>
+            )}
+            {!session && !loading && (
+              <Link to="/auth">
+                <Button variant="ghost" size="icon" className="text-bokumono-text" aria-label="ログイン">
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
           </nav>
         ) : (
           <nav className="flex space-x-4 items-center">
@@ -57,6 +77,19 @@ const Header: React.FC = () => {
                 マイページ
               </Button>
             </Link>
+            {session && !loading && (
+              <Button variant="ghost" className="text-bokumono-text" onClick={handleSignOut}>
+                <LogOut className="h-5 w-5 mr-1" />
+                ログアウト
+              </Button>
+            )}
+            {!session && !loading && (
+              <Link to="/auth">
+                <Button variant="ghost" className="text-bokumono-text">
+                  ログイン
+                </Button>
+              </Link>
+            )}
           </nav>
         )}
       </div>
