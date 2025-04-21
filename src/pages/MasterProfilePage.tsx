@@ -27,6 +27,11 @@ const MasterProfilePage: React.FC = () => {
     );
   }
 
+  // フォーマット: YYYY/MM/DD
+  const formattedBirthdate = profile?.birthdate
+    ? new Date(profile.birthdate).toISOString().slice(0, 10).replace(/-/g, "/")
+    : "未設定";
+
   return (
     <div className="flex flex-col items-center pt-8">
       <Card className="w-full max-w-md glass-morphism">
@@ -44,7 +49,11 @@ const MasterProfilePage: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-neutral-300">{profile?.bio || "自己紹介がありません。"}</p>
+          <p className="text-neutral-300 mb-2">{profile?.bio || "自己紹介がありません。"}</p>
+          <div className="text-bokumono-text space-y-1">
+            <p><span className="font-semibold">名前:</span> {profile?.name || "未設定"}</p>
+            <p><span className="font-semibold">誕生日:</span> {formattedBirthdate}</p>
+          </div>
         </CardContent>
         <CardFooter className="flex justify-end">
           <Link to="/master/edit">
