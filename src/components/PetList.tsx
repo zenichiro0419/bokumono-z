@@ -7,7 +7,7 @@ import PetCard from "@/components/PetCard";
 import { Search, Plus } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { Pet } from "@/types";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const PetList: React.FC = () => {
   const { activePets, archivedPets, isLoading } = useApp();
