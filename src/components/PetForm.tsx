@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Pet } from "@/types";
@@ -13,22 +12,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { format, parseISO } from "date-fns";
-import { ja } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useApp } from "@/context/AppContext";
 
 interface PetFormProps {
@@ -38,7 +25,7 @@ interface PetFormProps {
 
 const formSchema = z.object({
   name: z.string().min(1, "ペットの名前は必須です"),
-  birthdate: z.date().nullable().optional(),
+  birthdate: z.string().nullable().optional(),
   status: z.enum(["active", "archived"]),
   memo: z.string().optional(),
   photoUrl: z.string().optional(),
@@ -58,7 +45,7 @@ const PetForm: React.FC<PetFormProps> = ({ pet, isEditing = false }) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: pet?.name || "",
-      birthdate: pet?.birthdate ? parseISO(pet.birthdate) : null,
+      birthdate: pet?.birthdate || "",
       status: pet?.status || "active",
       memo: pet?.memo || "",
       photoUrl: pet?.photoUrl || "/placeholder.svg",
@@ -67,20 +54,13 @@ const PetForm: React.FC<PetFormProps> = ({ pet, isEditing = false }) => {
   });
 
   const onSubmit = (values: FormValues) => {
-    // Convert Date to ISO string for storage
-    const birthdate = values.birthdate ? format(values.birthdate, 'yyyy-MM-dd') : null;
-
     if (isEditing && pet) {
-      updatePet(pet.id, {
-        ...values,
-        birthdate,
-      });
+      updatePet(pet.id, values);
       navigate(`/pet/${pet.id}`);
     } else {
-      // Make sure all required fields are explicitly set before passing to addPet
       const newPetData: Omit<Pet, "id" | "createdAt" | "updatedAt" | "age"> = {
         name: values.name,
-        birthdate,
+        birthdate: values.birthdate,
         status: values.status,
         memo: values.memo || "",
         photoUrl: values.photoUrl || "/placeholder.svg",
@@ -92,12 +72,9 @@ const PetForm: React.FC<PetFormProps> = ({ pet, isEditing = false }) => {
     }
   };
 
-  // Handle file upload preview
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // In a real app, we would upload this to a server
-      // For now, we'll just create a local URL for preview
       const objectUrl = URL.createObjectURL(file);
       setPhotoPreview(objectUrl);
       form.setValue("photoUrl", objectUrl);
@@ -157,38 +134,17 @@ const PetForm: React.FC<PetFormProps> = ({ pet, isEditing = false }) => {
             control={form.control}
             name="birthdate"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>誕生日</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, 'yyyy/MM/dd', { locale: ja })
-                        ) : (
-                          <span>誕生日を選択</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value || undefined}
-                      onSelect={field.onChange}
-                      initialFocus
-                      locale={ja}
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
+              <FormItem>
+                <FormLabel>誕生日 (YYYY-MM-DD)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="2020-01-01"
+                    pattern="\d{4}-\d{2}-\d{2}"
+                    {...field}
+                    value={field.value || ""}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -219,20 +175,18 @@ const PetForm: React.FC<PetFormProps> = ({ pet, isEditing = false }) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>ステータス</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="ステータスを選択" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="active">アクティブ</SelectItem>
-                    <SelectItem value="archived">アーカイブ</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <Tabs
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    className="w-full"
+                  >
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="active">アクティブ</TabsTrigger>
+                      <TabsTrigger value="archived">アーカイブ</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
