@@ -47,7 +47,7 @@ const PetList: React.FC = () => {
           <Input
             type="text"
             placeholder="ペットを検索..."
-            className="pl-10 bg-bokumono-card text-bokumono-text border-bokumono-muted/30 w-full"
+            className="bg-bokumono-card text-bokumono-text border-bokumono-muted/30 w-full"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
