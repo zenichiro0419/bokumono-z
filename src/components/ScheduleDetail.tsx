@@ -19,6 +19,7 @@ import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Pet, Schedule } from "@/types";
 import { useApp } from "@/context/AppContext";
+import { cn } from "@/lib/utils";
 
 interface ScheduleDetailProps {
   schedule: Schedule;
