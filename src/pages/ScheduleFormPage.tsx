@@ -1,0 +1,52 @@
+
+import React from "react";
+import { useParams, useLocation, Navigate } from "react-router-dom";
+import Layout from "@/components/Layout";
+import ScheduleForm from "@/components/ScheduleForm";
+import { useApp } from "@/context/AppContext";
+
+const ScheduleFormPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const { getScheduleById, isLoading } = useApp();
+  const location = useLocation();
+  const isEditing = id !== "new";
+  
+  // Parse query parameters for default pet ID when creating a new schedule
+  const queryParams = new URLSearchParams(location.search);
+  const defaultPetId = queryParams.get("petId") || undefined;
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="text-center py-20">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-bokumono-primary mb-4"></div>
+          <p className="text-bokumono-text">読み込み中...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  // If we're editing, make sure the schedule exists
+  if (isEditing) {
+    const schedule = id ? getScheduleById(id) : undefined;
+    
+    if (!schedule) {
+      return <Navigate to="/calendar" replace />;
+    }
+
+    return (
+      <Layout>
+        <ScheduleForm schedule={schedule} isEditing={true} />
+      </Layout>
+    );
+  }
+
+  // For new schedules
+  return (
+    <Layout>
+      <ScheduleForm defaultPetId={defaultPetId} />
+    </Layout>
+  );
+};
+
+export default ScheduleFormPage;
