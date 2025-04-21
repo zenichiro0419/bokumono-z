@@ -12,6 +12,11 @@ export const useSchedules = () => {
 
   const loadSchedules = useCallback(async () => {
     try {
+      if (!session?.user) {
+        console.log("No user session found, cannot load schedules");
+        return;
+      }
+
       const { data: schedulesData, error: schedulesError } = await supabase
         .from('schedules')
         .select('*')
@@ -39,10 +44,22 @@ export const useSchedules = () => {
         variant: "destructive"
       });
     }
-  }, [toast]);
+  }, [toast, session]);
 
   const addSchedule = async (schedule: Omit<Schedule, "id" | "createdAt" | "updatedAt">) => {
     try {
+      if (!session?.user) {
+        console.error("No user session found, cannot add schedule");
+        toast({
+          title: "エラー",
+          description: "ログインが必要です",
+          variant: "destructive"
+        });
+        return null;
+      }
+
+      console.log("Adding schedule with data:", schedule);
+
       const { data, error } = await supabase
         .from('schedules')
         .insert([{
@@ -55,7 +72,10 @@ export const useSchedules = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Detailed error:', error);
+        throw error;
+      }
 
       const newSchedule: Schedule = {
         id: data.id,

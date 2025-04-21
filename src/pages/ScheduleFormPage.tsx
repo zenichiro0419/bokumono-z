@@ -4,11 +4,14 @@ import { useParams, useLocation, Navigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import ScheduleForm from "@/components/ScheduleForm";
 import { useApp } from "@/context/AppContext";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/components/ui/sonner";
 
 const ScheduleFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { getScheduleById, isLoading } = useApp();
   const location = useLocation();
+  const { session } = useAuth();
   
   // Check if we're on the /schedule/new path or editing an existing schedule
   const isNew = !id || location.pathname === "/schedule/new";
@@ -27,6 +30,15 @@ const ScheduleFormPage: React.FC = () => {
         </div>
       </Layout>
     );
+  }
+
+  // Check if user is logged in
+  if (!session) {
+    toast({
+      description: "予定を追加・編集するにはログインしてください",
+      variant: "destructive"
+    });
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   // If we're editing, make sure the schedule exists

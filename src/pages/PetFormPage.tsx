@@ -31,7 +31,6 @@ const PetFormPage: React.FC = () => {
   // For new pets, check if user is logged in
   if (isNewPet && !session) {
     toast({
-      title: "ログインが必要です",
       description: "ペットを追加するにはログインしてください",
       variant: "destructive"
     });
