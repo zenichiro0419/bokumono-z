@@ -1,18 +1,9 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Pet, Schedule } from "@/types";
-import { 
-  getMockPets, 
-  getMockSchedules, 
-  addMockPet, 
-  updateMockPet, 
-  deleteMockPet,
-  addMockSchedule,
-  updateMockSchedule,
-  deleteMockSchedule
-} from "@/lib/mock-data";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO, differenceInYears } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AppContextType {
   pets: Pet[];
@@ -23,12 +14,12 @@ interface AppContextType {
   getPetById: (id: string) => Pet | undefined;
   getScheduleById: (id: string) => Schedule | undefined;
   getSchedulesByPetId: (petId: string) => Schedule[];
-  addPet: (pet: Omit<Pet, "id" | "createdAt" | "updatedAt" | "age">) => Pet;
-  updatePet: (id: string, updates: Partial<Omit<Pet, "id" | "createdAt" | "updatedAt" | "age">>) => Pet | null;
-  deletePet: (id: string) => boolean;
-  addSchedule: (schedule: Omit<Schedule, "id" | "createdAt" | "updatedAt">) => Schedule | null;
-  updateSchedule: (id: string, updates: Partial<Omit<Schedule, "id" | "createdAt" | "updatedAt">>) => Schedule | null;
-  deleteSchedule: (id: string) => boolean;
+  addPet: (pet: Omit<Pet, "id" | "createdAt" | "updatedAt" | "age">) => Promise<Pet | null>;
+  updatePet: (id: string, updates: Partial<Omit<Pet, "id" | "createdAt" | "updatedAt" | "age">>) => Promise<Pet | null>;
+  deletePet: (id: string) => Promise<boolean>;
+  addSchedule: (schedule: Omit<Schedule, "id" | "createdAt" | "updatedAt">) => Promise<Schedule | null>;
+  updateSchedule: (id: string, updates: Partial<Omit<Schedule, "id" | "createdAt" | "updatedAt">>) => Promise<Schedule | null>;
+  deleteSchedule: (id: string) => Promise<boolean>;
   checkScheduleConflict: (petId: string, startDate: string, endDate: string, excludeId?: string) => boolean;
   calculatePetAge: (birthdate: string | null | undefined) => number | undefined;
 }
@@ -45,18 +36,39 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const activePets = pets.filter(pet => pet.status === "active");
   const archivedPets = pets.filter(pet => pet.status === "archived");
 
-  // Load mock data
+  // Load data from Supabase
   useEffect(() => {
     const loadData = async () => {
-      // Simulate API loading delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setPets(getMockPets());
-      setSchedules(getMockSchedules());
-      setIsLoading(false);
+      try {
+        const { data: petsData, error: petsError } = await supabase
+          .from('pets')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (petsError) throw petsError;
+        setPets(petsData || []);
+
+        const { data: schedulesData, error: schedulesError } = await supabase
+          .from('schedules')
+          .select('*')
+          .order('start_date', { ascending: true });
+
+        if (schedulesError) throw schedulesError;
+        setSchedules(schedulesData || []);
+      } catch (error) {
+        console.error('Error loading data:', error);
+        toast({
+          title: "エラー",
+          description: "データの読み込みに失敗しました",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     loadData();
-  }, []);
+  }, [toast]);
 
   // Calculate pet age from birthdate
   const calculatePetAge = (birthdate: string | null | undefined): number | undefined => {
@@ -72,9 +84,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Utility functions
   const getPetById = (id: string) => pets.find(pet => pet.id === id);
-  
   const getScheduleById = (id: string) => schedules.find(schedule => schedule.id === id);
-  
   const getSchedulesByPetId = (petId: string) => schedules.filter(schedule => schedule.petId === petId);
 
   // Check for schedule conflicts
@@ -92,7 +102,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const existingStart = new Date(schedule.startDate).getTime();
       const existingEnd = new Date(schedule.endDate).getTime();
 
-      // Check for overlap
       return (
         (newStart >= existingStart && newStart < existingEnd) ||
         (newEnd > existingStart && newEnd <= existingEnd) ||
@@ -102,50 +111,88 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   // CRUD operations for pets
-  const addPet = (pet: Omit<Pet, "id" | "createdAt" | "updatedAt" | "age">) => {
-    const newPet = addMockPet(pet);
-    setPets([...pets, newPet]);
+  const addPet = async (pet: Omit<Pet, "id" | "createdAt" | "updatedAt">): Promise<Pet | null> => {
+    const { data, error } = await supabase
+      .from('pets')
+      .insert([pet])
+      .select()
+      .single();
+
+    if (error) {
+      toast({
+        title: "エラー",
+        description: "ペットの追加に失敗しました",
+        variant: "destructive"
+      });
+      return null;
+    }
+
+    setPets([data, ...pets]);
     toast({
       title: "ペットを追加しました",
-      description: `${newPet.name}を追加しました`,
+      description: `${data.name}を追加しました`,
     });
-    return newPet;
+    return data;
   };
 
-  const updatePet = (id: string, updates: Partial<Omit<Pet, "id" | "createdAt" | "updatedAt" | "age">>) => {
-    const updatedPet = updateMockPet(id, updates);
-    if (updatedPet) {
-      setPets(pets.map(pet => pet.id === id ? updatedPet : pet));
+  const updatePet = async (
+    id: string,
+    updates: Partial<Omit<Pet, "id" | "createdAt" | "updatedAt">>
+  ): Promise<Pet | null> => {
+    const { data, error } = await supabase
+      .from('pets')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
       toast({
-        title: "ペット情報を更新しました",
-        description: `${updatedPet.name}の情報を更新しました`,
+        title: "エラー",
+        description: "ペット情報の更新に失敗しました",
+        variant: "destructive"
       });
+      return null;
     }
-    return updatedPet;
+
+    setPets(pets.map(pet => pet.id === id ? data : pet));
+    toast({
+      title: "ペット情報を更新しました",
+      description: `${data.name}の情報を更新しました`,
+    });
+    return data;
   };
 
-  const deletePet = (id: string) => {
+  const deletePet = async (id: string): Promise<boolean> => {
     const petToDelete = getPetById(id);
-    const success = deleteMockPet(id);
-    if (success && petToDelete) {
-      setPets(pets.filter(pet => pet.id !== id));
-      // Also delete associated schedules
-      const associatedSchedules = getSchedulesByPetId(id);
-      associatedSchedules.forEach(schedule => {
-        deleteMockSchedule(schedule.id);
+    const { error } = await supabase
+      .from('pets')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast({
+        title: "エラー",
+        description: "ペットの削除に失敗しました",
+        variant: "destructive"
       });
-      setSchedules(schedules.filter(schedule => schedule.petId !== id));
+      return false;
+    }
+
+    setPets(pets.filter(pet => pet.id !== id));
+    if (petToDelete) {
       toast({
         title: "ペットを削除しました",
         description: `${petToDelete.name}を削除しました`,
       });
     }
-    return success;
+    return true;
   };
 
   // CRUD operations for schedules
-  const addSchedule = (schedule: Omit<Schedule, "id" | "createdAt" | "updatedAt">) => {
-    // Check for conflicts
+  const addSchedule = async (
+    schedule: Omit<Schedule, "id" | "createdAt" | "updatedAt">
+  ): Promise<Schedule | null> => {
     if (checkScheduleConflict(schedule.petId, schedule.startDate, schedule.endDate)) {
       toast({
         title: "スケジュール重複",
@@ -155,21 +202,37 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return null;
     }
 
-    const newSchedule = addMockSchedule(schedule);
-    setSchedules([...schedules, newSchedule]);
-    const pet = getPetById(schedule.petId);
+    const { data, error } = await supabase
+      .from('schedules')
+      .insert([schedule])
+      .select()
+      .single();
+
+    if (error) {
+      toast({
+        title: "エラー",
+        description: "予定の追加に失敗しました",
+        variant: "destructive"
+      });
+      return null;
+    }
+
+    setSchedules([...schedules, data]);
+    const pet = getPetById(data.petId);
     toast({
       title: "予定を追加しました",
       description: `${pet?.name || 'ペット'}の予定を追加しました`,
     });
-    return newSchedule;
+    return data;
   };
 
-  const updateSchedule = (id: string, updates: Partial<Omit<Schedule, "id" | "createdAt" | "updatedAt">>) => {
+  const updateSchedule = async (
+    id: string,
+    updates: Partial<Omit<Schedule, "id" | "createdAt" | "updatedAt">>
+  ): Promise<Schedule | null> => {
     const currentSchedule = getScheduleById(id);
     if (!currentSchedule) return null;
 
-    // Check for conflicts if dates are being updated
     if (
       (updates.startDate || updates.endDate || updates.petId) &&
       checkScheduleConflict(
@@ -187,30 +250,55 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return null;
     }
 
-    const updatedSchedule = updateMockSchedule(id, updates);
-    if (updatedSchedule) {
-      setSchedules(schedules.map(schedule => schedule.id === id ? updatedSchedule : schedule));
-      const pet = getPetById(updatedSchedule.petId);
+    const { data, error } = await supabase
+      .from('schedules')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
       toast({
-        title: "予定を更新しました",
-        description: `${pet?.name || 'ペット'}の予定を更新しました`,
+        title: "エラー",
+        description: "予定の更新に失敗しました",
+        variant: "destructive"
       });
+      return null;
     }
-    return updatedSchedule;
+
+    setSchedules(schedules.map(schedule => schedule.id === id ? data : schedule));
+    const pet = getPetById(data.petId);
+    toast({
+      title: "予定を更新しました",
+      description: `${pet?.name || 'ペット'}の予定を更新しました`,
+    });
+    return data;
   };
 
-  const deleteSchedule = (id: string) => {
+  const deleteSchedule = async (id: string): Promise<boolean> => {
     const scheduleToDelete = getScheduleById(id);
     const pet = scheduleToDelete ? getPetById(scheduleToDelete.petId) : null;
-    const success = deleteMockSchedule(id);
-    if (success) {
-      setSchedules(schedules.filter(schedule => schedule.id !== id));
+
+    const { error } = await supabase
+      .from('schedules')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
       toast({
-        title: "予定を削除しました",
-        description: `${pet?.name || 'ペット'}の予定を削除しました`,
+        title: "エラー",
+        description: "予定の削除に失敗しました",
+        variant: "destructive"
       });
+      return false;
     }
-    return success;
+
+    setSchedules(schedules.filter(schedule => schedule.id !== id));
+    toast({
+      title: "予定を削除しました",
+      description: `${pet?.name || 'ペット'}の予定を削除しました`,
+    });
+    return true;
   };
 
   const value: AppContextType = {
