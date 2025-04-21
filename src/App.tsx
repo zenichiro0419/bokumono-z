@@ -56,6 +56,14 @@ const App = () => {
                   }
                 />
                 <Route
+                  path="/schedule/new"
+                  element={
+                    <AuthGuard>
+                      <ScheduleFormPage />
+                    </AuthGuard>
+                  }
+                />
+                <Route
                   path="/schedule/:id"
                   element={
                     <AuthGuard>
