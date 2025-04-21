@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +11,8 @@ import PetFormPage from "./pages/PetFormPage";
 import CalendarPage from "./pages/CalendarPage";
 import ScheduleDetailPage from "./pages/ScheduleDetailPage";
 import ScheduleFormPage from "./pages/ScheduleFormPage";
+import MasterProfilePage from "./pages/MasterProfilePage";
+import EditMasterProfilePage from "./pages/EditMasterProfilePage";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,8 @@ const App = () => (
             <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/schedule/:id" element={<ScheduleDetailPage />} />
             <Route path="/schedule/:id/edit" element={<ScheduleFormPage />} />
+            <Route path="/master" element={<MasterProfilePage />} />
+            <Route path="/master/edit" element={<EditMasterProfilePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
