@@ -63,10 +63,16 @@ const PetForm: React.FC<PetFormProps> = ({ pet, isEditing = false }) => {
       updatePet(pet.id, values);
       navigate(`/pet/${pet.id}`);
     } else {
-      const newPet = addPet({
-        ...values,
+      // Make sure all required fields are explicitly set before passing to addPet
+      const newPetData: Omit<Pet, "id" | "createdAt" | "updatedAt"> = {
+        name: values.name,
+        age: values.age,
+        status: values.status,
+        memo: values.memo || "",
         photoUrl: values.photoUrl || "/placeholder.svg",
-      });
+      };
+      
+      const newPet = addPet(newPetData);
       navigate(`/pet/${newPet.id}`);
     }
   };
