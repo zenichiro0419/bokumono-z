@@ -55,19 +55,25 @@ const PetForm: React.FC<PetFormProps> = ({ pet, isEditing = false }) => {
   };
 
   const onSubmit = async (values: FormValues) => {
+    // Clean up the birthdate value - if it's empty, make it null
+    const cleanedValues = {
+      ...values,
+      birthdate: values.birthdate && values.birthdate.trim() !== "" ? values.birthdate : null
+    };
+
     if (isEditing && pet) {
-      const updatedPet = await updatePet(pet.id, values);
+      const updatedPet = await updatePet(pet.id, cleanedValues);
       if (updatedPet) {
         navigate(`/pet/${pet.id}`);
       }
     } else {
-      const newPetData: Omit<Pet, "id" | "createdAt" | "updatedAt" | "age"> = {
-        name: values.name,
-        birthdate: values.birthdate,
-        status: values.status,
-        memo: values.memo || "",
-        photoUrl: values.photoUrl || "/placeholder.svg",
-        perceived_master_age: values.perceived_master_age,
+      const newPetData: Omit<Pet, "id" | "createdAt" | "updatedAt"> = {
+        name: cleanedValues.name,
+        birthdate: cleanedValues.birthdate,
+        status: cleanedValues.status,
+        memo: cleanedValues.memo || "",
+        photoUrl: cleanedValues.photoUrl || "/placeholder.svg",
+        perceived_master_age: cleanedValues.perceived_master_age,
       };
       
       const newPet = await addPet(newPetData);

@@ -4,11 +4,14 @@ import { useParams, Navigate, useLocation } from "react-router-dom";
 import Layout from "@/components/Layout";
 import PetForm from "@/components/PetForm";
 import { useApp } from "@/context/AppContext";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/components/ui/sonner";
 
 const PetFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { getPetById, isLoading } = useApp();
   const location = useLocation();
+  const { session } = useAuth();
   
   console.log("PetFormPage accessed with path:", location.pathname);
   const isEditing = id && id !== "new";
@@ -23,6 +26,16 @@ const PetFormPage: React.FC = () => {
         </div>
       </Layout>
     );
+  }
+
+  // For new pets, check if user is logged in
+  if (isNewPet && !session) {
+    toast({
+      title: "ログインが必要です",
+      description: "ペットを追加するにはログインしてください",
+      variant: "destructive"
+    });
+    return <Navigate to="/auth" replace />;
   }
 
   // If we're editing, make sure the pet exists

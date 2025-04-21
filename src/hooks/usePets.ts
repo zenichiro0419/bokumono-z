@@ -54,8 +54,8 @@ export const usePets = () => {
         .from('pets')
         .insert([{
           name: pet.name,
-          birthdate: pet.birthdate,
-          status: pet.status, // pet.status is already of type "active" | "archived"
+          birthdate: pet.birthdate && pet.birthdate.trim() !== "" ? pet.birthdate : null,
+          status: pet.status,
           memo: pet.memo,
           photo_url: pet.photoUrl,
           perceived_master_age: pet.perceived_master_age,
@@ -70,7 +70,7 @@ export const usePets = () => {
         id: data.id,
         name: data.name,
         birthdate: data.birthdate,
-        status: data.status as "active" | "archived", // Type assertion to ensure status is of the correct type
+        status: data.status as "active" | "archived",
         memo: data.memo || "",
         photoUrl: data.photo_url || "/placeholder.svg",
         perceived_master_age: data.perceived_master_age,
@@ -101,7 +101,7 @@ export const usePets = () => {
         .from('pets')
         .update({
           name: updates.name,
-          birthdate: updates.birthdate,
+          birthdate: updates.birthdate && updates.birthdate.trim() !== "" ? updates.birthdate : null,
           status: updates.status,
           memo: updates.memo,
           photo_url: updates.photoUrl,
@@ -117,7 +117,7 @@ export const usePets = () => {
         id: data.id,
         name: data.name,
         birthdate: data.birthdate,
-        status: data.status as "active" | "archived", // Type assertion to ensure status is of the correct type
+        status: data.status as "active" | "archived",
         memo: data.memo || "",
         photoUrl: data.photo_url || "/placeholder.svg",
         perceived_master_age: data.perceived_master_age,
