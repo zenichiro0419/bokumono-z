@@ -49,7 +49,6 @@ const MasterProfilePage: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-neutral-300 mb-2">{profile?.bio || "自己紹介がありません。"}</p>
           <div className="text-bokumono-text space-y-1">
             <p><span className="font-semibold">名前:</span> {profile?.name || "未設定"}</p>
             <p><span className="font-semibold">誕生日:</span> {formattedBirthdate}</p>

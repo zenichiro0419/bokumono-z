@@ -16,6 +16,7 @@ const EditMasterProfilePage: React.FC = () => {
   const [avatarPreview, setAvatarPreview] = useState<string>(profile?.avatar_url || PLACEHOLDER_AVATAR);
   const [saving, setSaving] = useState(false);
   const [birthdate, setBirthdate] = useState<string>(profile?.birthdate || "");
+  const [name, setName] = useState<string>(profile?.name || "");
   const { toast } = useToast();
 
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const EditMasterProfilePage: React.FC = () => {
     if (profile) {
       setAvatarPreview(profile.avatar_url || PLACEHOLDER_AVATAR);
       setBirthdate(profile.birthdate || "");
+      setName(profile.name || "");
     }
   }, [profile]);
 
@@ -42,11 +44,13 @@ const EditMasterProfilePage: React.FC = () => {
     );
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setName(value);
     if (profile) {
       setProfile({
         ...profile,
-        [e.target.name]: e.target.value,
+        name: value,
       });
     }
   };
@@ -84,7 +88,7 @@ const EditMasterProfilePage: React.FC = () => {
       try {
         const ok = await saveProfile({
           id: profile.id,
-          name: profile.name || "No name",
+          name: name || "No name",
           avatar_url: profile.avatar_url || PLACEHOLDER_AVATAR,
           birthdate: profile.birthdate || null,
         });
@@ -148,8 +152,8 @@ const EditMasterProfilePage: React.FC = () => {
               <label className="block mb-1 text-muted-foreground">名前</label>
               <Input
                 name="name"
-                value={profile?.name || ""}
-                onChange={handleChange}
+                value={name}
+                onChange={handleNameChange}
                 placeholder="マスターの名前"
                 required
               />
