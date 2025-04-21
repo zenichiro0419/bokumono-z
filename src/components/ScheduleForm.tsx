@@ -71,7 +71,7 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
     },
   });
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = async (values: FormValues) => {
     // Parse the time string to get hours and minutes
     const [hours, minutes] = values.startTime.split(":").map(Number);
     
@@ -83,7 +83,7 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
     const endDateTime = addHours(startDateTime, values.duration);
     
     if (isEditing && schedule) {
-      const updatedSchedule = updateSchedule(schedule.id, {
+      const updatedSchedule = await updateSchedule(schedule.id, {
         petId: values.petId,
         title: values.title,
         details: values.details,
@@ -95,7 +95,7 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
         navigate(`/schedule/${schedule.id}`);
       }
     } else {
-      const newSchedule = addSchedule({
+      const newSchedule = await addSchedule({
         petId: values.petId,
         title: values.title,
         details: values.details,

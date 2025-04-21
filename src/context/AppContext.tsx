@@ -46,7 +46,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           .order('created_at', { ascending: false });
 
         if (petsError) throw petsError;
-        setPets(petsData || []);
+        
+        // Map database fields to our application types
+        const mappedPets: Pet[] = (petsData || []).map(pet => ({
+          id: pet.id,
+          name: pet.name,
+          birthdate: pet.birthdate,
+          status: pet.status as "active" | "archived",
+          memo: pet.memo || "",
+          photoUrl: pet.photo_url || "/placeholder.svg",
+          perceived_master_age: pet.perceived_master_age,
+          createdAt: pet.created_at,
+          updatedAt: pet.updated_at
+        }));
+        
+        setPets(mappedPets);
 
         const { data: schedulesData, error: schedulesError } = await supabase
           .from('schedules')
@@ -54,7 +68,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           .order('start_date', { ascending: true });
 
         if (schedulesError) throw schedulesError;
-        setSchedules(schedulesData || []);
+        
+        // Map database fields to our application types
+        const mappedSchedules: Schedule[] = (schedulesData || []).map(schedule => ({
+          id: schedule.id,
+          petId: schedule.pet_id,
+          title: schedule.title,
+          details: schedule.details || "",
+          startDate: schedule.start_date,
+          endDate: schedule.end_date,
+          createdAt: schedule.created_at,
+          updatedAt: schedule.updated_at
+        }));
+        
+        setSchedules(mappedSchedules);
       } catch (error) {
         console.error('Error loading data:', error);
         toast({
@@ -112,9 +139,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // CRUD operations for pets
   const addPet = async (pet: Omit<Pet, "id" | "createdAt" | "updatedAt">): Promise<Pet | null> => {
+    // Convert from our app model to database model
+    const dbPet = {
+      name: pet.name,
+      birthdate: pet.birthdate,
+      status: pet.status,
+      memo: pet.memo,
+      photo_url: pet.photoUrl,
+      perceived_master_age: pet.perceived_master_age
+    };
+
     const { data, error } = await supabase
       .from('pets')
-      .insert([pet])
+      .insert([dbPet])
       .select()
       .single();
 
@@ -127,21 +164,43 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return null;
     }
 
-    setPets([data, ...pets]);
+    // Convert from database model back to our app model
+    const newPet: Pet = {
+      id: data.id,
+      name: data.name,
+      birthdate: data.birthdate,
+      status: data.status as "active" | "archived",
+      memo: data.memo || "",
+      photoUrl: data.photo_url || "/placeholder.svg",
+      perceived_master_age: data.perceived_master_age,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at
+    };
+
+    setPets([newPet, ...pets]);
     toast({
       title: "ペットを追加しました",
-      description: `${data.name}を追加しました`,
+      description: `${newPet.name}を追加しました`,
     });
-    return data;
+    return newPet;
   };
 
   const updatePet = async (
     id: string,
     updates: Partial<Omit<Pet, "id" | "createdAt" | "updatedAt">>
   ): Promise<Pet | null> => {
+    // Convert from our app model to database model
+    const dbUpdates: Record<string, any> = {};
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.birthdate !== undefined) dbUpdates.birthdate = updates.birthdate;
+    if (updates.status !== undefined) dbUpdates.status = updates.status;
+    if (updates.memo !== undefined) dbUpdates.memo = updates.memo;
+    if (updates.photoUrl !== undefined) dbUpdates.photo_url = updates.photoUrl;
+    if (updates.perceived_master_age !== undefined) dbUpdates.perceived_master_age = updates.perceived_master_age;
+
     const { data, error } = await supabase
       .from('pets')
-      .update(updates)
+      .update(dbUpdates)
       .eq('id', id)
       .select()
       .single();
@@ -155,12 +214,25 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return null;
     }
 
-    setPets(pets.map(pet => pet.id === id ? data : pet));
+    // Convert from database model back to our app model
+    const updatedPet: Pet = {
+      id: data.id,
+      name: data.name,
+      birthdate: data.birthdate,
+      status: data.status as "active" | "archived",
+      memo: data.memo || "",
+      photoUrl: data.photo_url || "/placeholder.svg",
+      perceived_master_age: data.perceived_master_age,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at
+    };
+
+    setPets(pets.map(pet => pet.id === id ? updatedPet : pet));
     toast({
       title: "ペット情報を更新しました",
-      description: `${data.name}の情報を更新しました`,
+      description: `${updatedPet.name}の情報を更新しました`,
     });
-    return data;
+    return updatedPet;
   };
 
   const deletePet = async (id: string): Promise<boolean> => {
@@ -202,9 +274,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return null;
     }
 
+    // Convert from our app model to database model
+    const dbSchedule = {
+      pet_id: schedule.petId,
+      title: schedule.title,
+      details: schedule.details,
+      start_date: schedule.startDate,
+      end_date: schedule.endDate
+    };
+
     const { data, error } = await supabase
       .from('schedules')
-      .insert([schedule])
+      .insert([dbSchedule])
       .select()
       .single();
 
@@ -217,13 +298,25 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return null;
     }
 
-    setSchedules([...schedules, data]);
-    const pet = getPetById(data.petId);
+    // Convert from database model back to our app model
+    const newSchedule: Schedule = {
+      id: data.id,
+      petId: data.pet_id,
+      title: data.title,
+      details: data.details || "",
+      startDate: data.start_date,
+      endDate: data.end_date,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at
+    };
+
+    setSchedules([...schedules, newSchedule]);
+    const pet = getPetById(newSchedule.petId);
     toast({
       title: "予定を追加しました",
       description: `${pet?.name || 'ペット'}の予定を追加しました`,
     });
-    return data;
+    return newSchedule;
   };
 
   const updateSchedule = async (
@@ -250,9 +343,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return null;
     }
 
+    // Convert from our app model to database model
+    const dbUpdates: Record<string, any> = {};
+    if (updates.petId !== undefined) dbUpdates.pet_id = updates.petId;
+    if (updates.title !== undefined) dbUpdates.title = updates.title;
+    if (updates.details !== undefined) dbUpdates.details = updates.details;
+    if (updates.startDate !== undefined) dbUpdates.start_date = updates.startDate;
+    if (updates.endDate !== undefined) dbUpdates.end_date = updates.endDate;
+
     const { data, error } = await supabase
       .from('schedules')
-      .update(updates)
+      .update(dbUpdates)
       .eq('id', id)
       .select()
       .single();
@@ -266,13 +367,25 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return null;
     }
 
-    setSchedules(schedules.map(schedule => schedule.id === id ? data : schedule));
-    const pet = getPetById(data.petId);
+    // Convert from database model back to our app model
+    const updatedSchedule: Schedule = {
+      id: data.id,
+      petId: data.pet_id,
+      title: data.title,
+      details: data.details || "",
+      startDate: data.start_date,
+      endDate: data.end_date,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at
+    };
+
+    setSchedules(schedules.map(schedule => schedule.id === id ? updatedSchedule : schedule));
+    const pet = getPetById(updatedSchedule.petId);
     toast({
       title: "予定を更新しました",
       description: `${pet?.name || 'ペット'}の予定を更新しました`,
     });
-    return data;
+    return updatedSchedule;
   };
 
   const deleteSchedule = async (id: string): Promise<boolean> => {

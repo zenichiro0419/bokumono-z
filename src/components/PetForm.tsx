@@ -54,10 +54,12 @@ const PetForm: React.FC<PetFormProps> = ({ pet, isEditing = false }) => {
     }
   };
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = async (values: FormValues) => {
     if (isEditing && pet) {
-      updatePet(pet.id, values);
-      navigate(`/pet/${pet.id}`);
+      const updatedPet = await updatePet(pet.id, values);
+      if (updatedPet) {
+        navigate(`/pet/${pet.id}`);
+      }
     } else {
       const newPetData: Omit<Pet, "id" | "createdAt" | "updatedAt" | "age"> = {
         name: values.name,
@@ -68,8 +70,10 @@ const PetForm: React.FC<PetFormProps> = ({ pet, isEditing = false }) => {
         perceived_master_age: values.perceived_master_age,
       };
       
-      const newPet = addPet(newPetData);
-      navigate(`/pet/${newPet.id}`);
+      const newPet = await addPet(newPetData);
+      if (newPet) {
+        navigate(`/pet/${newPet.id}`);
+      }
     }
   };
 
